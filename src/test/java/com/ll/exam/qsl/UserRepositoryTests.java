@@ -8,46 +8,67 @@ import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
+import javax.transaction.Transactional;
 import java.util.Arrays;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+
 @SpringBootTest
+@Transactional //각 테스트에 전부 Transactional 붙인거랑 동일, test+transa~ =롤백 > dn반영 노
+@ActiveProfiles("test") // 테스트 모드 활성화
 class UserRepositoryTests {
-@Autowired
-private UserRepository userRepository;
+	@Autowired
+	private UserRepository userRepository;
 
 	@Test
 	@DisplayName("회원 생성")
 	void t1() {
-		SiteUser u1 = SiteUser.builder()
-				.username("user1")
+		SiteUser u3 = SiteUser.builder()
+				.username("user3")
 				.password("{noop}1234")
-				.email("user1@test.com")
+				.email("user3@test.com")
 				.build();
 
-		SiteUser u2 = SiteUser.builder()
-				.username("user2")
+		SiteUser u4 = SiteUser.builder()
+				.username("user4")
 				.password("{noop}1234")
-				.email("user2@test.com")
+				.email("user4@test.com")
 				.build();
 
-		// SiteUser u2 = new SiteUser(null, "user2", "{noop}1234", "user2@test.com");
-
-		userRepository.saveAll(Arrays.asList(u1, u2));
+		userRepository.saveAll(Arrays.asList(u3, u4));
 	}
 
 	@Test
-	@DisplayName("1번 회원을 qsl 로 생성")
-	void t2(){
-	SiteUser u1 = userRepository.getQslUser(1L);
+	@DisplayName("1번 회원을 Qsl로 가져오기")
+	void t2() {
+		SiteUser u1 = userRepository.getQslUser(1L);
 
 		assertThat(u1.getId()).isEqualTo(1L);
 		assertThat(u1.getUsername()).isEqualTo("user1");
 		assertThat(u1.getEmail()).isEqualTo("user1@test.com");
 		assertThat(u1.getPassword()).isEqualTo("{noop}1234");
+	}
 
+	@Test
+	@DisplayName("2번 회원을 Qsl로 가져오기")
+	void t3() {
+		SiteUser u2 = userRepository.getQslUser(2L);
+
+		assertThat(u2.getId()).isEqualTo(2L);
+		assertThat(u2.getUsername()).isEqualTo("user2");
+		assertThat(u2.getEmail()).isEqualTo("user2@test.com");
+		assertThat(u2.getPassword()).isEqualTo("{noop}1234");
+	}
+
+	@Test
+	@DisplayName("전체회원수")
+	void t4() {
+	 	int count = userRepository.getQslCount();
+
+		 assertThat(count).isGreaterThan(0);
 
 	}
 

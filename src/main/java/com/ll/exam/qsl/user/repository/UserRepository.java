@@ -10,4 +10,5 @@ import javax.persistence.*;
 
 public interface UserRepository extends JpaRepository<SiteUser, Long>,UserRepositoryCustom {
 
+
 }
