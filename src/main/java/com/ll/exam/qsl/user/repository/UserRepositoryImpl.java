@@ -5,6 +5,8 @@ import com.ll.exam.qsl.user.entity.SiteUser;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 
+import java.util.List;
+
 import static com.ll.exam.qsl.user.entity.QSiteUser.siteUser;
 
 
@@ -55,7 +57,28 @@ public class UserRepositoryImpl implements UserRepositoryCustom {
                 .orderBy(siteUser.id.asc())
                 .limit(1)
                 .fetchOne();
+        // .fetchfirst() 를 하는것도 좋다. fetchOne 은 진짜 하나가 아닐 경우 에러가 남
+    }
 
+    @Override
+    public List<SiteUser> getQslUsersOrderByIdAsc() {
+        return jpaQueryFactory
+                .select(siteUser)
+                .from(siteUser)
+                .orderBy(siteUser.id.asc())
+                .fetch();
+    }
 
+    @Override
+    public List<SiteUser> searchQsl(String user1) {
+        return jpaQueryFactory
+                .select(siteUser)
+                .from(siteUser)
+                .where(
+                        siteUser.username.contains(user1)
+                                .or(siteUser.email.contains(user1))
+                )
+                .orderBy(siteUser.id.asc())
+                .fetch();
     }
 }

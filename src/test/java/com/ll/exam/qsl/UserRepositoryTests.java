@@ -12,6 +12,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import javax.transaction.Transactional;
 import java.util.Arrays;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -75,9 +76,54 @@ class UserRepositoryTests {
 	@DisplayName("가장 오래된 회원 1명")
 	void t5() {
 		SiteUser u1 = userRepository.getQslOrderByIdAscOne();
+		assertThat(u1.getId()).isEqualTo(1L);
+	}
+	@Test
+	@DisplayName("전체회원, 오래된 순")
+	void t6() {
+		List<SiteUser> users = userRepository.getQslUsersOrderByIdAsc();
+
+		SiteUser u1 = users.get(0);
 
 		assertThat(u1.getId()).isEqualTo(1L);
+		assertThat(u1.getUsername()).isEqualTo("user1");
+		assertThat(u1.getEmail()).isEqualTo("user1@test.com");
+		assertThat(u1.getPassword()).isEqualTo("{noop}1234");
 
+		SiteUser u2 = users.get(1);
+
+		assertThat(u2.getId()).isEqualTo(2L);
+		assertThat(u2.getUsername()).isEqualTo("user2");
+		assertThat(u2.getEmail()).isEqualTo("user2@test.com");
+		assertThat(u2.getPassword()).isEqualTo("{noop}1234");
+	}
+	@Test
+	@DisplayName("검색, List 리턴")
+	void t7() {
+		// 검색대상 : username, email
+		// user1 로 검색
+		List<SiteUser> users = userRepository.searchQsl("user1");
+
+		assertThat(users.size()).isEqualTo(1);
+
+		SiteUser u = users.get(0);
+
+		assertThat(u.getId()).isEqualTo(1L);
+		assertThat(u.getUsername()).isEqualTo("user1");
+		assertThat(u.getEmail()).isEqualTo("user1@test.com");
+		assertThat(u.getPassword()).isEqualTo("{noop}1234");
+
+		// user2 로 검색
+		users = userRepository.searchQsl("user2");
+
+		assertThat(users.size()).isEqualTo(1);
+
+		u = users.get(0);
+
+		assertThat(u.getId()).isEqualTo(2L);
+		assertThat(u.getUsername()).isEqualTo("user2");
+		assertThat(u.getEmail()).isEqualTo("user2@test.com");
+		assertThat(u.getPassword()).isEqualTo("{noop}1234");
 	}
 
 }
