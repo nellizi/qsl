@@ -21,7 +21,13 @@ private UserRepository userRepository;
     @Test
 	@DisplayName("회원생성")
 	void SiteUser(){
-		SiteUser s1 = new SiteUser(null,"user1","{noop}1234","user1@test.com");
+		//SiteUser s1 = new SiteUser(null,"user1","{noop}1234","user1@test.com");
+		SiteUser s1=SiteUser.builder()
+				.username("user1")
+				.password("{noop}1234")
+				.email("user1@test.com")
+				.build();
+
 		SiteUser s2 = new SiteUser(null,"user2","{noop}1234","user22@test.com");
 
 		userRepository.saveAll(Arrays.asList(s1,s2));
