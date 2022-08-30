@@ -2,8 +2,12 @@ package com.ll.exam.qsl.user.repository;
 
 import com.ll.exam.qsl.user.entity.QSiteUser;
 import com.ll.exam.qsl.user.entity.SiteUser;
+import com.querydsl.core.QueryResults;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -80,5 +84,22 @@ public class UserRepositoryImpl implements UserRepositoryCustom {
                 )
                 .orderBy(siteUser.id.asc())
                 .fetch();
+    }
+
+    @Override
+    public Page<SiteUser> searchQsl(String user, Pageable pageable) {
+       List<SiteUser>siteUsers= jpaQueryFactory
+                .select(siteUser)
+                .from(siteUser)
+                .where(
+                        siteUser.username.contains(user)
+                                .or(siteUser.email.contains(user))
+                )
+                .orderBy(siteUser.id.asc())
+                .offset(pageable.getOffset())   //N 번부터 시작
+                .limit(pageable.getPageSize())
+                .fetch();//조회 갯수
+        return new PageImpl<>(siteUsers, pageable, siteUsers.size());
+
     }
 }
