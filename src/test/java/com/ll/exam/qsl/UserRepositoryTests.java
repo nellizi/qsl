@@ -72,17 +72,19 @@ class UserRepositoryTests {
 	@Test
 	@DisplayName("전체회원수")
 	void t4() {
-	 	int count = userRepository.getQslCount();
+		int count = userRepository.getQslCount();
 
-		 assertThat(count).isGreaterThan(0);
+		assertThat(count).isGreaterThan(0);
 
 	}
+
 	@Test
 	@DisplayName("가장 오래된 회원 1명")
 	void t5() {
 		SiteUser u1 = userRepository.getQslOrderByIdAscOne();
 		assertThat(u1.getId()).isEqualTo(1L);
 	}
+
 	@Test
 	@DisplayName("전체회원, 오래된 순")
 	void t6() {
@@ -102,6 +104,7 @@ class UserRepositoryTests {
 		assertThat(u2.getEmail()).isEqualTo("user2@test.com");
 		assertThat(u2.getPassword()).isEqualTo("{noop}1234");
 	}
+
 	@Test
 	@DisplayName("검색, List 리턴")
 	void t7() {
@@ -137,8 +140,10 @@ class UserRepositoryTests {
 		int itemsInAPage = 1; // 한 페이지에 보여줄 아이템 개수
 		List<Sort.Order> sorts = new ArrayList<>();
 		sorts.add(Sort.Order.asc("id"));
-		Pageable pageable = PageRequest.of(1, itemsInAPage, Sort.by(sorts)); // 한 페이지에 10까지 가능
+		Pageable pageable = PageRequest.of(1, itemsInAPage, Sort.by(sorts));
 		Page<SiteUser> users = userRepository.searchQsl("user", pageable);
+
+		assertThat(users.getTotalPages()).isEqualTo(2);
 		// 검색어 : user1
 		// 한 페이지에 나올 수 있는 아이템 수 : 1개
 		// 현재 페이지 : 1
@@ -163,4 +168,26 @@ class UserRepositoryTests {
          */
 	}
 
+	@Test
+	@DisplayName("검색, Page 리턴, id DESC, pageSize=1, page=0")
+	void t9() {
+		long totalCount = userRepository.count();
+		int pageSize = 1; // 한 페이지에 보여줄 아이템 개수
+		int totalPages = (int) Math.ceil(totalCount / (double) pageSize);
+		int page = 1;
+		String kw = "user";
+
+		List<Sort.Order> sorts = new ArrayList<>();
+		sorts.add(Sort.Order.desc("id"));
+		Pageable pageable = PageRequest.of(page, pageSize, Sort.by(sorts)); // 한 페이지에 10까지 가능
+		Page<SiteUser> usersPage = userRepository.searchQsl(kw, pageable);
+
+		assertThat(usersPage.getTotalPages()).isEqualTo(totalPages);
+		assertThat(usersPage.getNumber()).isEqualTo(page);
+		assertThat(usersPage.getSize()).isEqualTo(pageSize);
+
+		List<SiteUser> users = usersPage.get().toList();
+
+		assertThat(users.size()).isEqualTo(pageSize);
+	}
 }
