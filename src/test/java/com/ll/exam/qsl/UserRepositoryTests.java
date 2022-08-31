@@ -12,6 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ActiveProfiles;
 
 import javax.transaction.Transactional;
@@ -190,4 +191,41 @@ class UserRepositoryTests {
 
 		assertThat(users.size()).isEqualTo(pageSize);
 	}
+	@Test
+	@DisplayName("회원에게 관심사를 등록할 수 있다.")
+	void t10() {
+		SiteUser u2 = userRepository.getQslUser(2L);
+
+		u2.addInterestKeywordContent("축구");
+		u2.addInterestKeywordContent("롤");
+		u2.addInterestKeywordContent("헬스");
+		u2.addInterestKeywordContent("헬스"); // 중복등록은 무시
+
+		userRepository.save(u2);
+		// 엔티티클래스 : InterestKeyword(interest_keyword 테이블)
+		// 중간테이블도 생성되어야 함, 힌트 : @ManyToMany
+		// interest_keyword 테이블에 축구, 롤, 헬스에 해당하는 row 3개 생성
+	}
+	@Test
+	@DisplayName("축구에 관심이 있는 회원을 검색할 수 있다.")
+	void t11() {
+		// 테스트 케이스 추가
+		// 구현, QueryDSL 사용
+
+
+		SiteUser u1 = userRepository.getQslUserByInterestKeyword("축구");
+		assertThat(u1.getId()).isEqualTo(1L);
+
+	}
+	@Test
+	@DisplayName("기본 JPA, 축구에 관심이 있는 회원을 검색할 수 있다.")
+	void t12(){
+		List<SiteUser> siteUsers = userRepository.findByInterestKeywords_content("축구");
+		assertThat(siteUsers.get(0).getId()).isEqualTo(1L);
+
+	}
+
+
+
+
 }

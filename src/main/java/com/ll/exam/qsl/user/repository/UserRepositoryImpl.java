@@ -1,8 +1,8 @@
 package com.ll.exam.qsl.user.repository;
 
-import com.ll.exam.qsl.user.entity.QSiteUser;
+
+import com.ll.exam.qsl.interestKeyword.entity.InterestKeyword;
 import com.ll.exam.qsl.user.entity.SiteUser;
-import com.querydsl.core.QueryResults;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.PathBuilder;
@@ -10,13 +10,12 @@ import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.support.PageableExecutionUtils;
 
 import java.util.List;
-import java.util.function.LongSupplier;
+
 
 import static com.ll.exam.qsl.user.entity.QSiteUser.siteUser;
 
@@ -124,5 +123,16 @@ public class UserRepositoryImpl implements UserRepositoryCustom {
 
 //        return PageableExecutionUtils.getPage(users, pageable, usersQuery::fetchCount);
         return PageableExecutionUtils.getPage(users, pageable, usersCountQuery::fetchOne);
+    }
+
+    @Override
+    public SiteUser getQslUserByInterestKeyword(String kw) {
+        List<SiteUser> siteUsers =jpaQueryFactory
+                .select(siteUser)
+                .from(siteUser)
+                .where(siteUser.interestKeywords.contains(new InterestKeyword(kw)))
+                .fetch();
+
+        return siteUsers.get(0);
     }
 }
