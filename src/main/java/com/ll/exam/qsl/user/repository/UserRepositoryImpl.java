@@ -1,7 +1,5 @@
 package com.ll.exam.qsl.user.repository;
 
-
-import com.ll.exam.qsl.interestKeyword.entity.InterestKeyword;
 import com.ll.exam.qsl.user.entity.SiteUser;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
@@ -16,58 +14,37 @@ import org.springframework.data.support.PageableExecutionUtils;
 
 import java.util.List;
 
-
+import static com.ll.exam.qsl.interestKeyword.entity.QInterestKeyword.interestKeyword;
 import static com.ll.exam.qsl.user.entity.QSiteUser.siteUser;
-
 
 @RequiredArgsConstructor
 public class UserRepositoryImpl implements UserRepositoryCustom {
     private final JPAQueryFactory jpaQueryFactory;
 
     @Override
-    public SiteUser getQslUser(Long id){
-         /*
-        SELECT *
-        FROM site_user
-        WHERE id = 1
-        */
-
-
+    public SiteUser getQslUser(Long id) {
         return jpaQueryFactory
                 .select(siteUser)
                 .from(siteUser)
                 .where(siteUser.id.eq(id))
                 .fetchOne();
-
-
     }
 
     @Override
-    public int getQslCount() {
-//        long count = jpaQueryFactory
-//                .selectFrom(siteUser)
-//                .fetchCount();
-//        int result = (int)count;
-//        return result;
-
-        long count = jpaQueryFactory
+    public long getQslCount() {
+        return jpaQueryFactory
                 .select(siteUser.count())
                 .from(siteUser)
                 .fetchOne();
-
-        return (int)count;
-
     }
 
     @Override
-    public SiteUser getQslOrderByIdAscOne() {
+    public SiteUser getQslUserOrderByIdAscOne() {
         return jpaQueryFactory
                 .select(siteUser)
                 .from(siteUser)
                 .orderBy(siteUser.id.asc())
-                .limit(1)
-                .fetchOne();
-        // .fetchfirst() 를 하는것도 좋다. fetchOne 은 진짜 하나가 아닐 경우 에러가 남
+                .fetchFirst();
     }
 
     @Override
@@ -80,15 +57,15 @@ public class UserRepositoryImpl implements UserRepositoryCustom {
     }
 
     @Override
-    public List<SiteUser> searchQsl(String user1) {
+    public List<SiteUser> searchQsl(String kw) {
         return jpaQueryFactory
                 .select(siteUser)
                 .from(siteUser)
                 .where(
-                        siteUser.username.contains(user1)
-                                .or(siteUser.email.contains(user1))
+                        siteUser.username.contains(kw)
+                                .or(siteUser.email.contains(kw))
                 )
-                .orderBy(siteUser.id.asc())
+                .orderBy(siteUser.id.desc())
                 .fetch();
     }
 
@@ -119,20 +96,26 @@ public class UserRepositoryImpl implements UserRepositoryCustom {
                                 .or(siteUser.email.contains(kw))
                 );
 
-        // return new PageImpl<>(users, pageable, usersQuery.fetchCount()); // 아래와 거의 동일
-
-//        return PageableExecutionUtils.getPage(users, pageable, usersQuery::fetchCount);
         return PageableExecutionUtils.getPage(users, pageable, usersCountQuery::fetchOne);
     }
 
     @Override
-    public SiteUser getQslUserByInterestKeyword(String kw) {
-        List<SiteUser> siteUsers =jpaQueryFactory
-                .select(siteUser)
-                .from(siteUser)
-                .where(siteUser.interestKeywords.contains(new InterestKeyword(kw)))
+    public List<SiteUser> getQslUsersByInterestKeyword(String keywordContent) {
+        /*
+       SELECT SU.*
+       FROM site_user AS SU
+       INNER JOIN site_user_interest_keywords AS SUIK
+       ON SU.id = SUIK.site_user_id
+       INNER JOIN interest_keyword AS IK
+       ON IK.content = SUIK.interest_keywords_content
+       WHERE IK.content = "축구";
+       */
+        return jpaQueryFactory
+                .selectFrom(siteUser)
+                .innerJoin(siteUser.interestKeywords, interestKeyword)
+                .where(
+                        interestKeyword.content.eq(keywordContent)
+                )
                 .fetch();
-
-        return siteUsers.get(0);
     }
 }

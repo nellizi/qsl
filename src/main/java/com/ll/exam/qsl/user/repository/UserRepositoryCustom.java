@@ -9,15 +9,15 @@ import java.util.List;
 public interface UserRepositoryCustom {
     SiteUser getQslUser(Long id);
 
-    int getQslCount();
+    long getQslCount();
 
-    SiteUser getQslOrderByIdAscOne();
+    SiteUser getQslUserOrderByIdAscOne();
 
     List<SiteUser> getQslUsersOrderByIdAsc();
 
-    List<SiteUser> searchQsl(String user1);
+    List<SiteUser> searchQsl(String kw);
 
-    Page<SiteUser> searchQsl(String user, Pageable pageable);
+    Page<SiteUser> searchQsl(String kw, Pageable pageable);
 
-    SiteUser getQslUserByInterestKeyword(String kw);
+    List<SiteUser> getQslUsersByInterestKeyword(String keywordContent);
 }
