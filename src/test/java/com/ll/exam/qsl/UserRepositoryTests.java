@@ -1,5 +1,6 @@
 package com.ll.exam.qsl;
 
+import com.ll.exam.qsl.interestKeyword.entity.InterestKeyword;
 import com.ll.exam.qsl.user.entity.SiteUser;
 import com.ll.exam.qsl.user.repository.UserRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -269,21 +270,41 @@ class UserRepositoryTests {
 		SiteUser u2 = userRepository.getQslUser(2L);
 
 		u1.follow(u2);
-
-		// follower
 		// u1의 구독자 : 0
 		assertThat(u1.getFollowers().size()).isEqualTo(0);
-
-		// follower
-		// u2의 구독자 : 1
+ 		// u2의 구독자 : 1
 		assertThat(u2.getFollowers().size()).isEqualTo(1);
-
-		// following
 		// u1이 구독중인 회원 : 1
 		assertThat(u1.getFollowings().size()).isEqualTo(1);
-
-		// following
 		// u2가 구독중인 회원 : 0
 		assertThat(u2.getFollowings().size()).isEqualTo(0);
 	}
+	@Test
+	@DisplayName("u1은 더 이상 농구에 관심이 없습니다.")
+//	@Rollback(value = false)
+	void t16() {
+		SiteUser u1 = userRepository.getQslUser(1L);
+
+		u1.removeInterestKeywordContent("농구");
+	}
+	@Test
+	@DisplayName("팔로우중인 사람들의 관심사")
+	void t17() {
+		SiteUser u = userRepository.getQslUser(8L);
+
+		List<String> keywordContents = userRepository.getKeywordContentsByFollowingsOf(u);
+
+		assertThat(keywordContents.size()).isEqualTo(5);
+
+		u = userRepository.getQslUser(7L);
+
+		keywordContents = userRepository.getKeywordContentsByFollowingsOf(u);
+
+		assertThat(keywordContents.size()).isEqualTo(4);
+	}
+
+
+
+
+
 }

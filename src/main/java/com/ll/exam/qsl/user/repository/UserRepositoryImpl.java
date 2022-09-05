@@ -1,5 +1,7 @@
 package com.ll.exam.qsl.user.repository;
 
+import com.ll.exam.qsl.interestKeyword.entity.InterestKeyword;
+import com.ll.exam.qsl.user.entity.QSiteUser;
 import com.ll.exam.qsl.user.entity.SiteUser;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
@@ -117,5 +119,52 @@ public class UserRepositoryImpl implements UserRepositoryCustom {
                         interestKeyword.content.eq(keywordContent)
                 )
                 .fetch();
+
+//        return jpaQueryFactory
+//                .selectFrom(siteUser)
+//                .innerJoin(siteUser.interestKeywords)
+//                .innerJoin(siteUser.interestKeywords)
+//                .where(
+//                        siteUser.interestKeywords.content.eq(keywordContent)
+//                )
+//                .fetch();
     }
+/*
+    @Override
+    public List<InterestKeyword> getQslInterestKeywordByQslUser(SiteUser keywordUser) {
+        return jpaQueryFactory
+                .select(interestKeyword.content).distinct()
+                .from(interestKeyword)
+                .innerJoin(keywordUser.followings.id,interestKeyword.user )
+                .where(
+                        interestKeyword.user.eq(keywordUser)
+                )
+                .fetch();
+
+    }
+    */
+    @Override
+    public List<String> getKeywordContentsByFollowingsOf(SiteUser user) {
+        QSiteUser siteUser2 = new QSiteUser("siteUser2");
+
+        return jpaQueryFactory
+                .select(interestKeyword.content)
+                .distinct()
+                .from(interestKeyword)
+                .innerJoin(interestKeyword.user, siteUser) // site_user
+                .innerJoin(siteUser.followers, siteUser2)
+                .where(siteUser2.id.eq(user.getId()))
+                .fetch();
+    }
+
+    @Override
+    public List<String> getQuerydslInterestKeywordsByFollowings(SiteUser user) {
+        return jpaQueryFactory.select(interestKeyword.content).distinct()
+                .from(interestKeyword)
+                .innerJoin(interestKeyword.user, siteUser)
+                .where(interestKeyword.user.in(user.getFollowings()))
+                .fetch();
+    }
+
+
 }
